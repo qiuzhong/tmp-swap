@@ -61,28 +61,29 @@ rclcpp::Publisher<std_msgs::msg::ByteMultiArray>::SharedPtr array_pub = nullptr;
 rclcpp::Publisher<std_msgs::msg::Header>::SharedPtr header_pub  = nullptr;
 rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr jointstate_pub = nullptr;
 
+auto node = rclcpp::Node::make_shared("cpp_subscription");
+
 template <typename U, typename T>
-void callback(const T msg, auto node) {
+void callback(const T msg) {
   // if (bool_pub)
   //   bool_pub->publish(msg);
   auto pub = node->create_publisher<U>(
-    std::string("back_") + std::string("Bool_js_cpp_channel"), 
-    rmw_qos_profile_default);
+    std::string("back_") + std::string("Bool_js_cpp_channel"));
   pub->publish(msg);
 }
 
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  node = rclcpp::Node::make_shared("cpp_subscription");
 
   // Bool
   // bool_pub = node->create_publisher<std_msgs::msg::Bool>(
   //   std::string("back_") + std::string("Bool_js_cpp_channel"), rmw_qos_profile_default);
   using namespace std::placeholders;
-  auto cpp_subscription = std::bind(callback, _1, node);
+  // auto cpp_subscription = std::bind(callback, _1, node);
+
   auto bool_sub = node->create_subscription<std_msgs::msg::Bool>(std::string("Bool_js_cpp_channel"),
-    cpp_subscription<std_msgs::msg::Bool, std_msgs::msg::Bool::SharedPtr>, rmw_qos_profile_default);
+    callback<std_msgs::msg::Bool, std_msgs::msg::Bool::SharedPtr>);
   
   // Byte
 
